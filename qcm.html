@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Théorique Mini-Projet - Janvier 2026</title>
+    <style>
+        :root { --primary: #0056b3; --secondary: #6c757d; --success: #28a745; --danger: #dc3545; --warning: #ffc107; --light: #f8f9fa; --dark: #343a40; }
+        
+        /* --- LAYOUT --- */
+        html, body { height: 100%; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; background-color: #eef2f5; color: var(--dark); overflow: hidden; }
+        body { -webkit-user-select: none; user-select: none; }
+
+        .app-container { display: flex; flex-direction: column; height: 100vh; max-width: 1400px; margin: 0 auto; background: white; position: relative; }
+
+        /* HEADER & FOOTER */
+        .header { flex: 0 0 auto; background: var(--dark); color: white; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; font-size: 0.95rem; }
+        .footer { flex: 0 0 auto; padding: 15px 30px; background: white; border-top: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center; height: 70px; }
+        .timer-badge { background: var(--warning); color: var(--dark); padding: 5px 15px; border-radius: 20px; font-weight: bold; font-family: monospace; font-size: 1.4rem; min-width:80px; text-align:center; }
+
+        /* CONTENU */
+        .main-content { flex: 1 1 auto; display: flex; overflow: hidden; position: relative; }
+        .quiz-area { flex: 1; padding: 30px; overflow-y: auto; background: white; }
+        .nav-palette { width: 260px; background: #f8f9fa; border-left: 1px solid #dee2e6; padding: 15px; overflow-y: auto; }
+        
+        /* QUESTIONS */
+        .question-card { display: none; }
+        .question-card.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        
+        .q-tag { display: inline-block; background: #e9ecef; color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; }
+        .q-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; color: #2c3e50; line-height: 1.4; }
+        
+        .option { display: flex; align-items: center; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
+        .option:hover { background: #f8f9fa; border-color: #ced4da; }
+        .option.selected { border-color: var(--primary); background-color: #e7f1ff; font-weight: 500; }
+        .marker { width: 20px; height: 20px; border: 2px solid #adb5bd; margin-right: 15px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .marker.radio { border-radius: 50%; } .marker.check { border-radius: 4px; }
+        .option.selected .marker { background: var(--primary); border-color: var(--primary); color: white; }
+        .option.selected .marker::after { content: '✔'; font-size: 12px; }
+
+        /* PALETTE */
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .p-btn { padding: 8px 0; border: 1px solid #dee2e6; background: white; text-align: center; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+        .p-btn.active { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); font-weight: bold; }
+        .p-btn.answered { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .btn { padding: 10px 25px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; }
+        .btn-prev { background: #e9ecef; color: var(--dark); }
+        .btn-next { background: var(--primary); color: white; }
+        .btn-finish { background: var(--success); color: white; display: none; }
+
+        /* OVERLAYS */
+        .full-screen-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 40px; overflow-y: auto; }
+        .input-group { margin-bottom: 20px; text-align: left; width: 100%; max-width: 450px; }
+        .input-group label { display: block; font-weight: bold; margin-bottom: 8px; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+        
+        #cheat-overlay { background: rgba(220, 53, 69, 0.98); color: white; justify-content: center; display: none; z-index: 3000; text-align: center; }
+
+        /* TUTEUR IA */
+        #socratic-assistant-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+        .ai-label { background: white; color: #7c3aed; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid #e9d5ff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: bounce 2s infinite; pointer-events: auto; }
+        #socratic-btn { background: #7c3aed; color: white; width: 60px; height: 60px; border-radius: 50%; border: none; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4); cursor: pointer; font-size: 1.8rem; pointer-events: auto; transition: transform 0.2s; }
+        #socratic-btn:hover { transform: scale(1.1); }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .chat-window { position: fixed; bottom: 100px; right: 20px; width: 350px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); display: none; flex-direction: column; z-index: 10000; overflow: hidden; border: 1px solid #e2e8f0; pointer-events: auto; }
+        .chat-header { background: #7c3aed; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; max-width: 85%; }
+        .msg-user { background: #7c3aed; color: white; align-self: flex-end; }
+        .msg-ai { background: white; border: 1px solid #e2e8f0; align-self: flex-start; }
+
+        .cat-stat-row { margin-bottom: 15px; width: 100%; }
+        .cat-label { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.9rem; font-weight: 600; }
+        .progress-bg { background: #e9ecef; height: 10px; border-radius: 5px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1s ease-in-out; }
+
+        /* IMPRESSION PDF OPTIMISÉE */
+        @media print {
+            body { visibility: hidden; background: white; }
+            #result-screen { visibility: visible; position: absolute; left: 0; top: 0; width: 100%; height: auto; overflow: visible; display: block !important; padding: 0 !important; background: white; }
+            #result-screen * { visibility: visible; }
+            .no-print, #login-screen, #app-header, #app-footer, #cheat-overlay, #socratic-assistant-container { display: none !important; }
+            
+            /* Style des questions dans le PDF */
+            .correction-item { 
+                page-break-inside: avoid; 
+                border: 1px solid #ddd; 
+                border-radius: 8px;
+                margin-bottom: 15px; 
+                padding: 15px; 
+                background: #fff;
+            }
+            #ai-coach-container { display: block !important; border: 1px solid #ccc; padding: 15px; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div id="cheat-overlay" class="full-screen-overlay">
+    <div style="font-size: 4rem;">⚠️</div>
+    <h1>ALERTE SÉCURITÉ</h1>
+    <p style="font-size: 1.2rem;">Action interdite détectée (Sortie d'écran / Changement onglet).</p>
+    <p>Avertissement : <span id="warn-count">0</span>/3</p>
+    <button class="btn" style="background: white; color: var(--danger); margin-top: 20px;" onclick="closeCheat()">Revenir à l'examen</button>
+</div>
+
+<div id="socratic-assistant-container">
+    <span class="ai-label">🤖 Tuteur AI CCNA</span>
+    <button id="socratic-btn" onclick="toggleChat()">💬</button>
+    <div class="chat-window" id="chat-window">
+        <div class="chat-header"><span>🎓 Tuteur CCNA</span><span style="cursor:pointer;" onclick="toggleChat()">✖</span></div>
+        <div class="chat-messages" id="chat-messages"><div class="msg msg-ai">Bonjour. Je suis ton Tuteur. Pose ta question, je te réponds directement. Je disparaîtrai au lancement de l'examen.</div></div>
+        <div style="padding:10px; display:flex; gap:10px; border-top:1px solid #eee;">
+            <input type="text" id="chat-input" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px;" placeholder="Question..." onkeypress="if(event.key==='Enter') sendChat()">
+            <button onclick="sendChat()" style="background:#7c3aed; color:white; border:none; padding:8px 12px; border-radius:4px;">➤</button>
+        </div>
+    </div>
+</div>
+
+<div id="login-screen" class="full-screen-overlay">
+    <div style="margin-top: 50px;"></div> 
+    <h1 style="color: var(--primary);">Examen Théorique Mini-Projet - Janvier 2026</h1>
+    <p style="font-size: 1.1rem; color: #666;">Enseignant : <strong>Elvis TCHIMEGNI</strong></p>
+    <div class="info-box">
+        <h3>🔒 Consignes</h3>
+        <ul>
+            <li><strong>Durée :</strong> 50 minutes.</li>
+            <li><strong>Questions :</strong> 100 QCM.</li>
+            <li><strong>Sécurité :</strong> 3 sorties d'écran = Disqualification.</li>
+            <li><strong>Tuteur :</strong> Disponible ici, indisponible durant l'examen.</li>
+        </ul>
+    </div>
+    <div class="input-group"><label>Nom & Prénom</label><input type="text" id="name" placeholder="Ex: ABOA LOUISE"></div>
+    <div class="input-group"><label>Établissement</label><input type="text" id="school" placeholder="Ex: Localhost Academy"></div>
+    <div class="input-group"><label>Filière</label><input type="text" id="major" placeholder="Ex: Administration réseau et système"></div>
+    <button class="btn btn-next" style="width: 100%; max-width: 450px; padding: 15px; font-size: 1.2rem; margin-top: 20px;" onclick="startExam()">LANCER L'EXAMEN</button>
+    <p style="color: var(--danger); font-size: 0.9rem; margin-top: 10px;">⚠️ Le Tuteur disparaîtra au lancement.</p>
+</div>
+
+<div class="app-container">
+    <div class="header" id="app-header" style="display:none;">
+        <div class="user-info-bar" id="user-display"></div>
+        <div class="timer-badge" id="timer">50:00</div>
+    </div>
+    <div class="main-content" id="app-content" style="display:none;">
+        <div class="quiz-area"><div id="quiz-questions"></div></div>
+        <div class="nav-palette">
+            <h4 style="margin-top:0;">Navigation</h4>
+            <div class="palette-grid" id="palette-grid"></div>
+        </div>
+    </div>
+    <div class="footer" id="app-footer" style="display:none;">
+        <button class="btn btn-prev" onclick="nav(-1)">Précédent</button>
+        <div id="q-indicator" style="font-weight:bold; color:var(--secondary);">Question 1 / 100</div>
+        <div>
+            <button class="btn btn-next" id="next-btn" onclick="nav(1)">Suivant</button>
+            <button class="btn btn-finish" id="finish-btn" onclick="checkFinish()">TERMINER</button>
+        </div>
+    </div>
+</div>
+
+<div id="result-screen" class="full-screen-overlay" style="display:none; align-items:flex-start;">
+    <div style="border-bottom: 3px solid var(--primary); width:100%; padding-bottom:15px; margin-bottom:20px;">
+        <h1 style="color:var(--primary); margin:0;">Rapport d'Examen</h1>
+        <h3 style="margin:5px 0; color:#555;">Théorie Mini-Projet - Janvier 2026</h3>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; width:100%; max-width:900px; margin-bottom:30px; background:#f8f9fa; padding:15px; border-radius:8px;">
+        <div>
+            <p style="margin:5px 0;"><strong>Étudiant :</strong> <span id="res-name"></span></p>
+            <p style="margin:5px 0;"><strong>Filière :</strong> <span id="res-major"></span></p>
+            <p style="margin:5px 0;"><strong>Établissement :</strong> <span id="res-school"></span></p>
+        </div>
+        <div style="text-align:right;">
+             <p style="margin:5px 0;"><strong>Enseignant :</strong> Elvis TCHIMEGNI</p>
+             <p style="margin:5px 0;"><strong>Date/Heure :</strong> <span id="res-date"></span></p>
+             <p style="margin:5px 0; color:red;"><strong>Alertes Triche :</strong> <span id="res-cheats">0</span>/3</p>
+        </div>
+    </div>
+
+    <div style="width:100%; text-align:center;">
+        <div style="width:140px; height:140px; border-radius:50%; border:8px solid var(--primary); display:flex; justify-content:center; align-items:center; font-size:2.5rem; font-weight:bold; color:var(--primary); margin:0 auto;" id="final-score">--/100</div>
+        <div id="final-decision" style="font-size:2rem; font-weight:bold; margin-top:10px;"></div>
+    </div>
+
+    <div style="width:100%; max-width:900px; margin:20px 0;" id="category-stats-container"></div>
+    
+    <p id="mail-status" style="font-weight:bold; color:var(--primary); text-align:center; width:100%;" class="no-print">Préparation de l'envoi...</p>
+    
+    <div class="no-print" style="width:100%; text-align:center; margin:20px 0;">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimer le Rapport PDF</button><br><br>
+        <button id="btn-generate-ai" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color:white; border:none; padding:12px 20px;" onclick="generateAICoach()">✨ Obtenir l'Analyse du Coach</button>
+    </div>
+
+    <div id="ai-coach-container" style="display:none; width:100%; max-width:900px; background:#f0fdf4; padding:20px; border-radius:8px; border:2px solid #bbf7d0; margin-bottom:30px;">
+        <div style="font-weight:bold; color:#15803d; font-size:1.3rem; margin-bottom:10px; border-bottom:1px solid #bbf7d0; padding-bottom:5px;">🤖 Analyse Stratégique du Coach</div>
+        <div id="ai-coach-content" style="line-height:1.6; color:#064e3b;">Chargement...</div>
+    </div>
+
+    <h3 style="width:100%; max-width:900px; border-bottom:1px solid #ccc; padding-bottom:10px;">Détail des Réponses et Corrections</h3>
+    <div id="correction-area" style="width:100%; max-width:900px; margin-bottom:50px;"></div>
+</div>
+
+<script>
+// --- CONFIGURATION ---
+const REQUIRED_Q = 100, PASS_SCORE = 80, DURATION_MIN = 50;
+const PART_1 = "gsk_"; 
+const PART_2 = "3c2NtKTExpZrRBxMbyCzWGdyb3FYU9fwh4cBd1bxJRwi35zyuRpJ"; // Mettez ici la fin de la clé (après le gsk_)
+const API_KEY = PART_1 + PART_2;
+
+
+
+
+// --- BASE DE DONNÉES (CORRIGÉE : SANS IMAGES) ---
+const FULL_DB = [
+    // MULTI-CHOIX
+    { category: "Transport", type: 'multi', count: 2, q: "Quels sont les deux principaux protocoles de la couche Transport du modèle TCP/IP ?", options: ["IP", "TCP", "HTTP", "UDP", "Ethernet"], a: [1, 3], e: "TCP (fiable) et UDP (rapide) sont les protocoles de couche 4." },
+    { category: "Switching", type: 'multi', count: 2, q: "Quels sont deux avantages majeurs de l'implémentation des VLANs dans un réseau ?", options: ["Réduction des domaines de diffusion", "Augmentation de la latence", "Amélioration de la sécurité", "Suppression du routage"], a: [0, 2], e: "Les VLANs segmentent les broadcasts et isolent les groupes." },
+    { category: "Adressage", type: 'multi', count: 3, q: "Quelles sont les trois plages d'adresses IP privées définies par la RFC 1918 ?", options: ["10.0.0.0/8", "172.16.0.0/12", "11.0.0.0/8", "192.168.0.0/16", "209.165.200.0/24"], a: [0, 1, 3], e: "10.x.x.x, 172.16-31.x.x et 192.168.x.x sont privées." },
+    { category: "Fondamentaux", type: 'multi', count: 2, q: "Quels équipements réseau fonctionnent au niveau de la couche 2 (Liaison de données) ?", options: ["Switch", "Hub", "Pont (Bridge)", "Répéteur"], a: [0, 2], e: "Switch et Pont utilisent les adresses MAC." },
+
+    // CHOIX UNIQUE
+    { category: "Fondamentaux", q: "Quelle est la caractéristique fondamentale d'un réseau convergent ?", options: ["Il utilise uniquement la fibre optique", "Il transporte voix, vidéo et données sur une même infrastructure", "Il sépare physiquement le téléphone et l'informatique", "Il ne nécessite aucun routeur"], a: 1, e: "La convergence unifie tous les types de trafic sur un seul réseau." },
+    { category: "Fondamentaux", q: "Dans une architecture réseau, quel élément assure la tolérance aux pannes ?", options: ["Le coût élevé", "La redondance des liens et équipements", "L'utilisation du Wi-Fi", "La suppression des pare-feu"], a: 1, e: "La redondance garantit la continuité de service." },
+    { category: "Fondamentaux", q: "Quel type de réseau s'étend sur une large zone géographique (géré par un FAI) ?", options: ["LAN", "WLAN", "WAN", "PAN"], a: 2, e: "WAN = Wide Area Network." },
+    { category: "Fondamentaux", q: "Quelle couche du modèle OSI gère le routage et l'adressage IP ?", options: ["Physique", "Liaison de données", "Réseau", "Transport"], a: 2, e: "Couche 3 : Réseau (Paquets)." },
+    { category: "Transport", q: "Quelle est l'unité de données (PDU) de la couche Transport ?", options: ["Trame", "Paquet", "Segment", "Bit"], a: 2, e: "Transport = Segment." },
+    { category: "Services IP", q: "Quel protocole permet de traduire les noms de domaine en adresses IP ?", options: ["DHCP", "DNS", "HTTP", "FTP"], a: 1, e: "DNS = Domain Name System." },
+    { category: "Gestion", q: "Quelle commande permet de passer en mode privilégié ?", options: ["configure terminal", "enable", "login", "exit"], a: 1, e: "La commande est 'enable'." },
+    { category: "Sécurité", q: "Quelle commande permet de chiffrer tous les mots de passe en clair dans la configuration ?", options: ["enable secret", "service password-encryption", "line console 0", "copy run start"], a: 1, e: "Service password-encryption applique un chiffrement faible." },
+    { category: "Switching", q: "Que faut-il configurer sur un switch pour pouvoir le gérer à distance ?", options: ["Une interface Loopback", "Une interface SVI (Vlan) avec une IP", "Le protocole OSPF", "Un câble console"], a: 1, e: "Une SVI (Switch Virtual Interface) est nécessaire pour l'IP de gestion." },
+    { category: "Adressage", q: "Quelle est la longueur en bits d'une adresse IPv4 ?", options: ["32 bits", "48 bits", "64 bits", "128 bits"], a: 0, e: "32 bits (4 octets)." },
+    { category: "Adressage", q: "Quelle est l'adresse de broadcast pour le réseau 192.168.10.0/24 ?", options: ["192.168.10.1", "192.168.10.0", "192.168.10.254", "192.168.10.255"], a: 3, e: "La dernière adresse de la plage est le broadcast." },
+    { category: "Adressage", q: "Quelle est la fonction principale du masque de sous-réseau ?", options: ["Crypter les données", "Distinguer la partie réseau de la partie hôte", "Traduire les noms DNS", "Attribuer une IP automatiquement"], a: 1, e: "Il sépare le NetID du HostID." },
+    { category: "Adressage", q: "Quelle est la plage d'adresses privées de classe C ?", options: ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16"], a: 2, e: "192.168.x.x est la classe C privée." },
+    { category: "IPv6", q: "Combien de bits compose une adresse IPv6 ?", options: ["32", "64", "128", "256"], a: 2, e: "128 bits." },
+    { category: "IPv6", q: "Quelle est la compression correcte pour l'adresse IPv6 2001:0db8:0000:0000:0000:0000:0000:0001 ?", options: ["2001:db8:0:0:0:0:0:1", "2001:db8::1", "2001:db8:::1", "2001:db8::"], a: 1, e: "Le double deux-points remplace la plus longue suite de zéros." },
+    { category: "IPv6", q: "Par quel préfixe commence une adresse IPv6 Link-local ?", options: ["2001::", "fe80::", "::1", "ff00::"], a: 1, e: "fe80:: est réservé au lien local." },
+    { category: "Routage", q: "Quelle commande permet d'afficher la table de routage ?", options: ["show ip int brief", "show run", "show ip route", "ping"], a: 2, e: "show ip route." },
+    { category: "Routage", q: "Que signifie la lettre 'C' dans la table de routage ?", options: ["Connecté directement", "Statique", "OSPF", "RIP"], a: 0, e: "C = Connected." },
+    { category: "Routage", q: "Que représente la distance administrative (AD) d'un protocole ?", options: ["La distance physique", "Le nombre de sauts", "La fiabilité de la source de routage", "La vitesse du lien"], a: 2, e: "Plus l'AD est basse, plus le protocole est fiable." },
+    { category: "Routage", q: "Quel protocole de routage utilise le nombre de sauts comme seule métrique ?", options: ["OSPF", "EIGRP", "RIP", "BGP"], a: 2, e: "RIP (Max 15 sauts)." },
+    { category: "Switching", q: "Quelle commande configure la passerelle par défaut sur un switch ?", options: ["ip route", "ip default-gateway", "interface vlan 1", "ip address"], a: 1, e: "ip default-gateway en mode config globale." },
+    { category: "Sécurité", q: "Quel est l'avantage principal de SSH par rapport à Telnet ?", options: ["Plus rapide", "Plus facile", "Chiffre les communications", "Ne nécessite pas de login"], a: 2, e: "SSH est sécurisé, Telnet est en clair." },
+    { category: "Fondamentaux", q: "Lors de l'encapsulation de la couche Transport vers Réseau, que devient le segment ?", options: ["Un paquet", "Une trame", "Des bits", "Une adresse MAC"], a: 0, e: "Le PDU de couche 3 est le Paquet." },
+    { category: "Gestion", q: "Quelle commande permet de voir la configuration de démarrage (NVRAM) ?", options: ["show running-config", "show startup-config", "show version", "show flash"], a: 1, e: "startup-config." },
+    { category: "Services IP", q: "Quel est le rôle du protocole DHCP ?", options: ["Routage", "Traduction de nom", "Attribution dynamique d'IP", "Transfert de fichier"], a: 2, e: "Dynamic Host Configuration Protocol." },
+    { category: "Adressage", q: "Quelle est l'adresse de bouclage IPv4 (localhost) ?", options: ["127.0.0.1", "192.168.1.1", "0.0.0.0", "255.255.255.255"], a: 0, e: "127.0.0.1." },
+    { category: "Gestion", q: "Quelle commande permet de nommer un routeur ?", options: ["name", "hostname", "description", "title"], a: 1, e: "hostname [nom]." },
+    { category: "Gestion", q: "Quel est le but de la commande 'banner motd' ?", options: ["Régler l'heure", "Afficher un message d'avertissement légal", "Changer le nom du routeur", "Configurer le mot de passe"], a: 1, e: "Message Of The Day." },
+    { category: "Adressage", q: "Quelle est la notation CIDR pour le masque 255.255.255.0 ?", options: ["/8", "/16", "/24", "/32"], a: 2, e: "24 bits à 1." },
+    { category: "Sécurité", q: "Quel protocole sécurisé est utilisé pour l'administration en ligne de commande ?", options: ["Telnet", "HTTP", "SSH", "TFTP"], a: 2, e: "SSH (Secure Shell)." },
+    { category: "Gestion", q: "Quelle commande permet d'activer une interface réseau ?", options: ["enable", "start", "no shutdown", "activation"], a: 2, e: "no shutdown." },
+    { category: "Fondamentaux", q: "Quel est le rôle du champ TTL dans un paquet IP ?", options: ["Augmenter la vitesse", "Éviter les boucles infinies", "Vérifier les erreurs", "Identifier la source"], a: 1, e: "Time To Live décrémente à chaque saut." },
+    { category: "Fondamentaux", q: "Quel protocole est utilisé par la commande Ping ?", options: ["HTTP", "ICMP", "TCP", "UDP"], a: 1, e: "ICMP Echo Request/Reply." },
+    { category: "Fondamentaux", q: "Quelle est la différence principale entre les modèles TCP/IP et OSI ?", options: ["TCP/IP a 7 couches", "TCP/IP a 4 couches", "Ils sont identiques", "OSI est pour le wifi"], a: 1, e: "TCP/IP est un modèle pratique à 4 couches." },
+    { category: "Fondamentaux", q: "Quel type de communication est 'Un vers plusieurs' (groupe) ?", options: ["Unicast", "Broadcast", "Multicast", "Simulcast"], a: 2, e: "Multicast." },
+    { category: "IPv6", q: "Que signifie le préfixe /64 dans une adresse IPv6 standard ?", options: ["64 bits réseau / 64 bits hôte", "L'adresse fait 64 bits", "Les 64 derniers bits sont le réseau", "C'est une adresse multicast"], a: 0, e: "C'est le découpage standard pour un LAN IPv6." },
+    { category: "Fondamentaux", q: "Quel organisme gère l'allocation des adresses IP au niveau mondial ?", options: ["IEEE", "IANA/ICANN", "W3C", "ISO"], a: 1, e: "IANA." },
+    { category: "Switching", q: "Quel équipement de couche 2 utilise les adresses MAC pour commuter ?", options: ["Hub", "Routeur", "Switch", "Serveur"], a: 2, e: "Le Switch." },
+    { category: "Cloud", q: "Que signifie l'acronyme SaaS ?", options: ["Storage as a Service", "Software as a Service", "System as a Service", "Switch as a Service"], a: 1, e: "Logiciel en tant que service." },
+    { category: "Adressage", q: "Que signifie une adresse IP en 169.254.x.x ?", options: ["Internet OK", "DHCP OK", "Échec DHCP (APIPA)", "C'est une IPv6"], a: 2, e: "Adresse auto-assignée (APIPA)." },
+    { category: "Adressage", q: "Quel masque de sous-réseau correspond à la notation /27 ?", options: ["255.255.255.192", "255.255.255.224", "255.255.255.240", "255.255.255.248"], a: 1, e: "/27 = 24 bits + 3 bits = 11100000 = .224." },
+    { category: "Gestion", q: "Quelle commande permet de sauvegarder la configuration en cours en mémoire NVRAM ?", options: ["save", "write memory", "copy running-config startup-config", "copy start run"], a: 2, e: "Copie de la RAM vers la NVRAM." },
+    { category: "Fondamentaux", q: "À quelle couche du modèle OSI appartient l'adresse MAC ?", options: ["Physique", "Liaison de données", "Réseau", "Transport"], a: 1, e: "Couche 2 (Liaison)." },
+    { category: "Services IP", q: "Quel est le port par défaut utilisé par le protocole HTTP ?", options: ["21", "23", "80", "443"], a: 2, e: "Port 80." },
+    { category: "Sécurité", q: "Quel est le port par défaut utilisé par le protocole HTTPS ?", options: ["80", "8080", "443", "22"], a: 2, e: "Port 443." },
+    { category: "Physique", q: "Quel type de câble est utilisé pour relier un PC à un Switch ?", options: ["Croisé", "Droit", "Console", "Fibre"], a: 1, e: "Câble droit (Straight-through)." },
+    { category: "Physique", q: "Quel type de câble est utilisé pour relier deux switchs entre eux ?", options: ["Croisé", "Droit", "Console", "Série"], a: 0, e: "Câble croisé (Crossover)." },
+    { category: "Adressage", q: "Quelle est la plage d'adresses définie pour la classe B ?", options: ["1-126", "128-191", "192-223", "224-239"], a: 1, e: "128.0.0.0 à 191.255.0.0." },
+    { category: "Services IP", q: "Quel protocole est utilisé pour résoudre une adresse MAC en adresse IP ?", options: ["ARP", "RARP", "DNS", "DHCP"], a: 1, e: "RARP (Reverse ARP)." },
+    { category: "Services IP", q: "Quel protocole est utilisé pour résoudre une adresse IP en adresse MAC ?", options: ["ARP", "DNS", "DHCP", "ICMP"], a: 0, e: "ARP (Address Resolution Protocol)." },
+    { category: "Gestion", q: "Quelle commande permet d'afficher la version de l'IOS et le registre de configuration ?", options: ["show running-config", "show flash", "show version", "show startup"], a: 2, e: "show version." },
+    { category: "Adressage", q: "Quelle est l'adresse de réseau pour l'hôte 192.168.1.33 avec un masque /27 ?", options: ["192.168.1.0", "192.168.1.30", "192.168.1.32", "192.168.1.31"], a: 2, e: "Le pas est de 32. 33 est dans le sous-réseau commençant à .32." },
+    { category: "Services IP", q: "Quel est le but principal de la traduction d'adresses réseau (NAT) ?", options: ["Traduire les IP privées en IP publiques", "Chiffrer les données", "Router les paquets", "Bloquer les virus"], a: 0, e: "Permet d'économiser les adresses IPv4 publiques." },
+    { category: "Switching", q: "Quel appareil permet de segmenter les domaines de collision mais pas les domaines de diffusion ?", options: ["Hub", "Switch", "Routeur", "Répéteur"], a: 1, e: "Le switch crée un domaine de collision par port." },
+    { category: "Routage", q: "Si les protocoles OSPF et EIGRP sont configurés, quel protocole sera choisi par le routeur pour acheminer le trafic ?", options: ["OSPF", "EIGRP", "BGP", "RIP"], a: 1, e: "EIGRP a une distance administrative (90) inférieure à OSPF (110)." },
+    { category: "Routage", q: "Si les protocoles RIP et OSPF sont configurés, quel protocole sera choisi par le routeur ?", options: ["RIP", "OSPF", "Le premier configuré", "Aléatoire"], a: 1, e: "OSPF (110) a une priorité plus élevée que RIP (120)." },
+    { category: "Routage", q: "Quelle commande permet de désactiver le protocole RIP ?", options: ["no router rip", "disable rip", "stop rip", "rip off"], a: 0, e: "Mode configuration globale." },
+    { category: "Physique", q: "Quelle est la forme du signal transmis dans une fibre optique ?", options: ["Impulsions électriques", "Impulsions lumineuses", "Ondes radio", "Sonore"], a: 1, e: "La lumière." },
+    { category: "Physique", q: "Quelle est la forme du signal transmis dans un câble coaxial ?", options: ["Impulsions électriques", "Impulsions lumineuses", "Ondes radio", "Magnétique"], a: 0, e: "L'électricité." },
+    { category: "Adressage", q: "Quel est le masque de sous-réseau par défaut pour la classe A ?", options: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "0.0.0.0"], a: 0, e: "/8." },
+    { category: "Adressage", q: "Quel est le masque de sous-réseau par défaut pour la classe B ?", options: ["255.0.0.0", "255.255.0.0", "255.255.255.0", "0.0.0.0"], a: 1, e: "/16." },
+    { category: "Adressage", q: "Combien d'adresses hôtes utilisables contient un sous-réseau /24 ?", options: ["256", "254", "255", "253"], a: 1, e: "256 - 2 (réseau + broadcast) = 254." },
+    { category: "Gestion", q: "Quelle commande permet d'attribuer une description à une interface ?", options: ["name", "description", "label", "comment"], a: 1, e: "description [texte]." },
+    { category: "Routage", q: "Quelle commande permet de désactiver le routage IP sur un routeur ?", options: ["no ip routing", "no router", "stop routing", "shutdown"], a: 0, e: "Transforme le routeur en simple hôte." },
+    { category: "Sécurité", q: "Quelle commande d'ACL permet de bloquer le trafic ICMP (Ping) ?", options: ["access-list deny icmp", "no ping", "block icmp", "stop ping"], a: 0, e: "deny icmp." },
+    { category: "Sécurité", q: "Quelle est la règle implicite qui se trouve à la fin de toute ACL ?", options: ["Permit any", "Deny any (Tout refuser)", "Permit local", "Log"], a: 1, e: "Tout ce qui n'est pas autorisé est interdit." },
+    { category: "Sécurité", q: "Quelle commande permet d'afficher les listes de contrôle d'accès (ACL) ?", options: ["show access-lists", "show rules", "display acl", "show filter"], a: 0, e: "Affiche les ACLs configurées." },
+    { category: "IPv6", q: "Quelle est l'adresse de boucle locale (Loopback) en IPv6 ?", options: ["::1", "127.0.0.1", "::", "FE80::1"], a: 0, e: "::1." },
+    { category: "IPv6", q: "Dans le format EUI-64, quel bit de l'adresse MAC est inversé ?", options: ["Le 7ème bit", "Le 1er bit", "Le dernier bit", "Aucun"], a: 0, e: "Le bit U/L (Universel/Local)." },
+    { category: "IPv6", q: "Quel protocole permet l'autoconfiguration IPv6 sans état (SLAAC) ?", options: ["DHCPv6", "NDP", "Static", "EUI"], a: 1, e: "Utilise les annonces de routeur (RA)." },
+    { category: "IPv6", q: "Quel message NDP est utilisé pour annoncer la présence d'un routeur ?", options: ["NS", "NA", "RS", "RA (Router Advertisement)"], a: 3, e: "RA." },
+    { category: "IPv6", q: "Quel message NDP est utilisé pour solliciter l'adresse MAC d'un voisin ?", options: ["NS (Neighbor Solicitation)", "NA", "RS", "RA"], a: 0, e: "Équivalent de la requête ARP." },
+    { category: "IPv6", q: "Quelle est l'adresse multicast IPv6 pour 'Tous les nœuds' ?", options: ["FF02::1", "FF02::2", "FF02::5", "FF02::A"], a: 0, e: "All Nodes." },
+    { category: "Gestion", q: "Quelle est l'extension de fichier typique d'une image Cisco IOS ?", options: [".bin", ".exe", ".iso", ".tar"], a: 0, e: "Fichier binaire." },
+    { category: "Gestion", q: "Quel système de fichiers Cisco permet de gérer les fichiers en ligne de commande ?", options: ["IFS (IOS File System)", "NTFS", "FAT", "EXT"], a: 0, e: "IFS." },
+    { category: "Gestion", q: "Quelle commande permet de lister les fichiers dans la mémoire flash ?", options: ["ls", "dir", "list", "show files"], a: 1, e: "dir flash:." },
+    { category: "Gestion", q: "Quelle commande permet d'effacer un fichier de la mémoire flash ?", options: ["delete", "remove", "erase", "rm"], a: 0, e: "delete flash:filename." },
+    { category: "Gestion", q: "Quelle commande permet de vérifier l'intégrité d'un fichier IOS (MD5) ?", options: ["verify", "check", "md5", "hash"], a: 0, e: "verify /md5." },
+    { category: "Sécurité", q: "Quel est le masque wildcard correspondant au masque /24 ?", options: ["0.0.0.255", "255.255.255.0", "0.0.255.255", "0.0.0.0"], a: 0, e: "L'inverse binaire de 255.255.255.0." },
+    { category: "Gestion", q: "Quelle commande permet de voir l'historique des commandes saisies ?", options: ["show history", "history", "recall", "list"], a: 0, e: "Affiche le tampon historique." },
+    { category: "Gestion", q: "Quelle est la taille par défaut de l'historique de commandes ?", options: ["10 lignes", "20 lignes", "50 lignes", "100 lignes"], a: 0, e: "10 commandes." },
+    { category: "Gestion", q: "Quelle commande permet de remettre le routeur en configuration d'usine ?", options: ["erase startup-config", "delete nvram", "reset", "factory"], a: 0, e: "Puis 'reload'." },
+    { category: "Services IP", q: "Quel port est utilisé par le canal de données FTP ?", options: ["20", "21", "22", "23"], a: 0, e: "Port 20." },
+    { category: "Services IP", q: "Quel port est utilisé par le canal de contrôle FTP ?", options: ["20", "21", "22", "23"], a: 1, e: "Port 21." },
+    { category: "Physique", q: "Quelle topologie réseau possède un point central de connexion ?", options: ["Étoile", "Bus", "Anneau", "Maillée"], a: 0, e: "Topologie Star." },
+    { category: "Physique", q: "Quelle topologie réseau offre la meilleure redondance ?", options: ["Maillée complète", "Étoile", "Bus", "Anneau"], a: 0, e: "Tous les nœuds sont connectés entre eux." },
+    { category: "Physique", q: "Quel type de fibre optique est utilisé pour les longues distances ?", options: ["Monomode", "Multimode", "Coax", "UTP"], a: 0, e: "Source Laser." },
+    { category: "Physique", q: "Quel type de fibre optique utilise une LED comme source lumineuse ?", options: ["Monomode", "Multimode", "Coax", "UTP"], a: 1, e: "Courte distance." },
+    { category: "Physique", q: "Quelle catégorie de câble Ethernet supporte 1 Gbps au minimum ?", options: ["Cat5e", "Cat3", "Cat4", "Coax"], a: 0, e: "Cat5e ou Cat6." },
+    { category: "Physique", q: "Quelle est la distance maximale théorique d'un câble UTP Ethernet ?", options: ["100 mètres", "50 mètres", "200 mètres", "500 mètres"], a: 0, e: "Standard 100m." },
+    { category: "Gestion", q: "Quelle commande Windows permet d'afficher le cache ARP ?", options: ["arp -a", "show arp", "ip arp", "getmac"], a: 0, e: "Commande DOS." },
+    { category: "Gestion", q: "Quelle commande Windows permet d'afficher la configuration IP ?", options: ["ipconfig", "ifconfig", "show ip", "ip addr"], a: 0, e: "ifconfig est pour Linux." },
+    { category: "Gestion", q: "Quelle commande Windows permet de tracer la route vers une destination ?", options: ["tracert", "traceroute", "trace", "pathping"], a: 0, e: "tracert (traceroute sur Cisco)." },
+
+    // --- CONCEPTS RÉSEAU ---
+    { category: "Fondamentaux", q: "Quel périphérique réseau a pour fonction principale de déterminer le meilleur chemin pour les paquets ?", options: ["Le Périphérique intermédiaire (Routeur)", "Le Périphérique final", "Le Serveur", "Le Support de transmission"], a: 0, e: "Les routeurs prennent les décisions de routage basées sur les adresses IP." },
+    { category: "Fondamentaux", q: "Quelle est la différence majeure entre un réseau WAN et un réseau LAN ?", options: ["Le WAN interconnecte des réseaux sur de vastes zones géographiques.", "Le WAN est administré localement par une entreprise.", "Le WAN couvre uniquement une maison.", "Le WAN offre toujours plus de débit que le LAN."], a: 0, e: "WAN signifie Wide Area Network (Réseau étendu)." },
+    { category: "Fondamentaux", q: "Que signifie le concept de 'tolérance aux pannes' en réseau ?", options: ["Limiter l'impact d'une panne et permettre une récupération rapide.", "Protéger le réseau contre les piratages.", "Permettre au réseau de s'étendre rapidement.", "Prioriser la voix sur les données."], a: 0, e: "C'est la capacité du réseau à continuer de fonctionner malgré une défaillance." },
+    { category: "Fondamentaux", q: "Quel est le but principal de l'encapsulation des données ?", options: ["Ajouter des en-têtes de protocole à chaque couche du modèle.", "Compresser les données pour gagner de la place.", "Chiffrer les données pour la sécurité.", "Diviser les messages en petits morceaux."], a: 0, e: "Les données deviennent Segment, puis Paquet, puis Trame." },
+    { category: "Fondamentaux", q: "Quelle couche du modèle TCP/IP regroupe les fonctions des couches Physique et Liaison du modèle OSI ?", options: ["La couche Accès réseau", "La couche Transport", "La couche Application", "La couche Internet"], a: 0, e: "C'est la couche la plus basse du modèle TCP/IP." },
+    { category: "Fondamentaux", q: "Quel organisme international gère l'allocation des adresses IP publiques et des noms de domaine ?", options: ["L'ICANN (IANA)", "L'IEEE", "L'ISO", "La TIA"], a: 0, e: "Internet Corporation for Assigned Names and Numbers." },
+    { category: "Gestion", q: "Dans quel type de mémoire est stockée la configuration en cours (running-config) ?", options: ["En RAM", "En NVRAM", "En Flash", "En ROM"], a: 0, e: "La RAM est volatile, d'où la perte de config au redémarrage si non sauvegardée." },
+    { category: "Adressage", q: "Quelle opération logique est utilisée par un routeur pour déterminer l'adresse réseau à partir d'une IP ?", options: ["Le ET logique (AND)", "Le OU logique (OR)", "Le OU exclusif (XOR)", "L'inversion (NOT)"], a: 0, e: "Adresse IP + Masque (AND) = Adresse Réseau." },
+    { category: "IPv6", q: "Quelle est la raison principale ayant motivé le développement du protocole IPv6 ?", options: ["L'épuisement des adresses IPv4 publiques.", "L'amélioration de la sécurité.", "L'augmentation de la vitesse de transmission.", "La complexité de configuration d'IPv4."], a: 0, e: "Les 4,3 milliards d'adresses IPv4 ne suffisaient plus." },
+    { category: "IPv6", q: "Quel est le préfixe de sous-réseau standard recommandé pour un LAN en IPv6 ?", options: ["/64", "/32", "/48", "/128"], a: 0, e: "Le /64 est nécessaire pour le fonctionnement de l'autoconfiguration (SLAAC)." },
+    
+    // --- ROUTAGE & PROTOCOLES ---
+    { category: "Routage", q: "Quel est l'objectif principal de la configuration d'une route statique ?", options: ["Permettre à l'administrateur de définir manuellement un chemin précis.", "Apprendre automatiquement la topologie du réseau.", "Connecter des PC entre eux.", "Aucun, c'est obsolète."], a: 0, e: "Elle offre un contrôle total du trafic mais ne s'adapte pas aux pannes." },
+    { category: "Routage", q: "Si le 'Next-Hop' d'une route statique est une adresse IP, que doit faire le routeur ?", options: ["Effectuer une consultation récursive pour trouver l'interface de sortie.", "Envoyer directement le paquet.", "Jeter le paquet.", "Envoyer un broadcast."], a: 0, e: "Il doit chercher dans la table de routage comment atteindre cette IP de saut suivant." },
+    { category: "Routage", q: "Dans le processus de routage, que signifie la règle du 'Longest Match' (Correspondance la plus longue) ?", options: ["Le routeur utilise la route avec le masque le plus précis (le plus long).", "Le routeur utilise le protocole le plus rapide.", "Le routeur utilise la route par défaut.", "Le routeur utilise la première route trouvée."], a: 0, e: "Un /32 sera toujours préféré à un /24 pour la même destination." },
+    { category: "Routage", q: "Qu'est-ce qu'une route statique flottante ?", options: ["Une route de secours avec une Distance Administrative plus élevée.", "Une route principale.", "Une route pour le trafic rapide.", "Une route sans fil."], a: 0, e: "Elle ne s'active que si la route principale (AD plus basse) tombe." },
+    { category: "Routage", q: "Quels paramètres sont utilisés pour calculer la métrique EIGRP par défaut ?", options: ["La Bande passante et le Délai", "Le nombre de Sauts", "Le Coût OSPF", "La Vitesse du lien"], a: 0, e: "C'est une métrique composite basée sur les valeurs K." },
+    { category: "Routage", q: "Quel code identifie une route apprise par EIGRP dans la table de routage ?", options: ["D", "E", "O", "R"], a: 0, e: "D provient de l'algorithme DUAL utilisé par EIGRP." },
+    { category: "Routage", q: "Quel protocole de couche 3 est utilisé par la commande Traceroute pour signaler les sauts ?", options: ["ICMP (Time Exceeded)", "UDP", "TCP", "IP"], a: 0, e: "Les routeurs renvoient un message ICMP quand le TTL expire." },
+    { category: "Routage", q: "Que désigne le terme 'Gateway of last resort' (Passerelle de dernier recours) ?", options: ["La route par défaut (0.0.0.0/0).", "Le dernier routeur du réseau.", "La connexion Internet.", "La passerelle du PC."], a: 0, e: "C'est la route utilisée si aucune autre route ne correspond." },
+
+    // --- VLAN & TRUNKING ---
+    { category: "Switching", q: "Quel est l'identifiant (ID) du VLAN par défaut sur tous les commutateurs Cisco ?", options: ["VLAN 1", "VLAN 10", "VLAN 99", "VLAN 100"], a: 0, e: "Tous les ports sont dans le VLAN 1 par défaut." },
+    { category: "Switching", q: "Quel est le protocole standard de l'IEEE utilisé pour le trunking (étiquetage) ?", options: ["802.1Q", "ISL", "DTP", "VTP"], a: 0, e: "Dot1Q est le standard ouvert, ISL est l'ancien propriétaire Cisco." },
+    { category: "Switching", q: "Quelle commande permet de créer un nouveau VLAN en mode de configuration globale ?", options: ["vlan [ID]", "interface vlan", "switchport vlan", "set vlan"], a: 0, e: "Exemple : vlan 10." },
+    { category: "Switching", q: "Quel mode DTP force l'interface à devenir un Trunk, sans négociation ?", options: ["switchport mode trunk", "dynamic auto", "dynamic desirable", "switchport mode access"], a: 0, e: "Cela active le trunking inconditionnellement." },
+    { category: "Switching", q: "Quel est l'effet de la commande 'switchport nonegotiate' sur une interface ?", options: ["Elle empêche l'envoi de trames DTP.", "Elle force le protocole DTP.", "Elle bloque le port en mode trunk.", "Elle ne fait rien."], a: 0, e: "Utile pour sécuriser le port et gagner du temps." },
+    { category: "Switching", q: "Quel est l'objectif principal de la configuration d'un VLAN Voix ?", options: ["Séparer et prioriser le trafic téléphonique (QoS).", "Utiliser le téléphone pour les données.", "C'est inutile.", "C'est le VLAN 1."], a: 0, e: "La voix est sensible au délai et doit être prioritaire." },
+    { category: "Switching", q: "Que se passe-t-il si les VLANs natifs sont configurés différemment aux deux extrémités d'un lien Trunk ?", options: ["Une erreur 'Native VLAN Mismatch' apparaît et du trafic peut être perdu.", "Rien, cela fonctionne.", "Le lien s'éteint.", "Le VLAN est supprimé."], a: 0, e: "C'est aussi un risque de sécurité (VLAN Hopping)." },
+    { category: "Switching", q: "Quelle est la taille de l'étiquette (Tag) 802.1Q insérée dans la trame Ethernet ?", options: ["4 octets", "2 octets", "8 octets", "1 octet"], a: 0, e: "Ce tag contient l'ID du VLAN et la priorité." },
+    { category: "Sécurité", q: "Qu'appelle-t-on un 'Black Hole VLAN' en sécurité ?", options: ["Un VLAN isolé où l'on place les ports inutilisés.", "Le VLAN 1.", "Le VLAN Natif.", "Une erreur de configuration."], a: 0, e: "Cela empêche un attaquant de se brancher sur un port libre." },
+    { category: "Routage", q: "En quoi consiste la méthode 'Router-on-a-stick' ?", options: ["Utiliser des sous-interfaces pour router entre VLANs.", "Utiliser un Switch L3.", "Utiliser un routeur par VLAN.", "Utiliser un pont."], a: 0, e: "Une seule interface physique trunkée gère plusieurs passerelles." },
+    { category: "Switching", q: "Est-il possible de supprimer le VLAN 1 sur un switch Cisco ?", options: ["Non, c'est impossible.", "Oui, en mode config.", "Oui, avec un mot de passe.", "Oui, en mode root."], a: 0, e: "C'est le VLAN de gestion par défaut et il est inamovible." },
+
+    // --- OSPF ---
+    { category: "Routage", q: "À quelle catégorie de protocoles de routage appartient OSPF ?", options: ["État de liens (Link-State)", "Vecteur de distance", "Hybride", "Statique"], a: 0, e: "Il connait la topologie complète du réseau." },
+    { category: "Routage", q: "Quelle formule est utilisée par OSPF pour calculer son coût (métrique) ?", options: ["Bande passante de référence / Bande passante de l'interface", "Nombre de sauts", "Délai total", "Charge du lien"], a: 0, e: "Plus la bande passante est élevée, plus le coût est bas." },
+    { category: "Routage", q: "Quelle est l'adresse Multicast utilisée pour contacter tous les routeurs OSPF ?", options: ["224.0.0.5", "224.0.0.6", "224.0.0.1", "224.0.0.9"], a: 0, e: "224.0.0.6 est pour les DR/BDR uniquement." },
+    { category: "Routage", q: "Quel type de paquet OSPF est utilisé pour maintenir le voisinage (Keepalive) ?", options: ["Hello", "LSU", "DBD", "LSR"], a: 0, e: "Envoyé périodiquement (ex: 10s)." },
+    { category: "Routage", q: "Comment se nomme la zone principale (Backbone) obligatoire dans OSPF ?", options: ["Zone 0", "Zone 1", "Zone 100", "Zone B"], a: 0, e: "Toutes les autres zones doivent s'y connecter." },
+    { category: "Routage", q: "Quel est le premier critère pour l'élection du routeur désigné (DR) ?", options: ["La priorité d'interface la plus haute", "L'adresse IP la plus basse", "L'adresse MAC la plus haute", "Le hasard"], a: 0, e: "Si égalité, on regarde le Router ID." },
+    { category: "Routage", q: "Dans quel ordre un routeur OSPF choisit-il son Router-ID (RID) ?", options: ["ID manuel > Interface Loopback > Interface Physique", "Interface Physique > Loopback", "IP la plus basse", "Adresse MAC"], a: 0, e: "La configuration manuelle est toujours prioritaire." },
+    { category: "Routage", q: "Quel est l'intervalle Hello par défaut sur un réseau Ethernet (Broadcast) ?", options: ["10 secondes", "30 secondes", "5 secondes", "60 secondes"], a: 0, e: "Le Dead Interval est 4 fois le Hello (40s)." },
+    { category: "Routage", q: "Quel est l'effet de la commande 'passive-interface' sur une interface OSPF ?", options: ["Elle arrête l'envoi de paquets Hello mais continue d'annoncer le réseau.", "Elle désactive l'interface complètement.", "Elle passe l'interface en mode switch.", "Elle ne fait rien."], a: 0, e: "On l'utilise vers les LANs pour ne pas bavarder inutilement." },
+    { category: "Routage", q: "Quel état OSPF indique que les bases de données sont parfaitement synchronisées ?", options: ["Full", "2-Way", "Loading", "ExStart"], a: 0, e: "C'est l'état final désiré." },
+    { category: "Routage", q: "Que signifie une priorité OSPF configurée à 0 sur une interface ?", options: ["Le routeur ne deviendra jamais DR ni BDR.", "Le routeur sera DR forcé.", "Le routeur sera BDR forcé.", "Le routeur est le chef."], a: 0, e: "Il reste en état DROther." },
+    { category: "Routage", q: "Quelle table OSPF contient la carte topologique complète du réseau ?", options: ["La LSDB (Link-State Database)", "La table de routage", "La table ARP", "La table MAC"], a: 0, e: "Elle contient tous les LSA reçus." },
+    { category: "Routage", q: "Quel algorithme mathématique est utilisé par OSPF pour calculer le meilleur chemin ?", options: ["Dijkstra (SPF - Shortest Path First)", "DUAL", "Bellman-Ford", "Kruskal"], a: 0, e: "Il calcule l'arbre du plus court chemin." },
+    { category: "Routage", q: "Qui génère les LSA de Type 1 (Router LSA) ?", options: ["Chaque routeur OSPF", "Seulement le DR", "Seulement l'ABR", "Les routeurs externes"], a: 0, e: "Tout routeur décrit ses propres liens." },
+    { category: "Routage", q: "Quelle commande permet de propager une route par défaut dans OSPF ?", options: ["default-information originate", "network 0.0.0.0", "redistribute static", "ip route static"], a: 0, e: "Elle injecte la passerelle de dernier recours." },
+
+    // ==================================================================
+    // DERNIERE PARTIE
+    // ==================================================================
+
+    { category: "Switching", q: "Dans le processus de commutation, comment un switch apprend-il les adresses MAC ?", options: ["En lisant l'adresse MAC source des trames entrantes.", "En lisant l'adresse MAC de destination.", "Via le protocole ARP.", "Il les connait par défaut."], a: 0, e: "Il associe la MAC source au port d'entrée dans sa table CAM." },
+    { category: "Routage", q: "Quelle est la distance administrative d'une route statique standard ?", options: ["1", "0", "90", "110"], a: 0, e: "C'est très fiable. (0 est pour directement connecté)." },
+    { category: "Services IP", q: "À quoi sert le protocole NTP dans un réseau Cisco ?", options: ["Synchroniser l'horloge des équipements pour des logs précis.", "Transférer des fichiers.", "Gérer le routage.", "Tester la connectivité."], a: 0, e: "Network Time Protocol est crucial pour le dépannage (Syslog)." },
+    { category: "Routage", q: "Quel type d'interface permet d'avoir plusieurs adresses IP sur un seul port physique pour les VLANs ?", options: ["Une sous-interface (ex: G0/0.10).", "Une interface Loopback.", "Une interface Console.", "Une interface Null."], a: 0, e: "Utilisé pour le routage Inter-VLAN (Router-on-a-stick)." },
+    { category: "Adressage", q: "Quel masque de sous-réseau permet d'avoir exactement 14 hôtes utilisables ?", options: ["/28 (255.255.255.240)", "/27", "/29", "/30"], a: 0, e: "4 bits hôtes : 2^4 = 16. Moins 2 (Réseau/Broadcast) = 14." },
+    { category: "Transport", q: "Quel est le rôle du contrôle de flux (Flow Control) à la couche 4 ?", options: ["Gérer la vitesse de transmission pour éviter la congestion.", "Router les paquets.", "Définir les adresses IP.", "Convertir le signal."], a: 0, e: "TCP utilise le fenêtrage (Windowing) pour cela." },
+    { category: "Gestion", q: "Quelle commande permet d'afficher un résumé rapide de l'état des interfaces IP ?", options: ["show ip interface brief", "show interfaces", "show ip route", "show run"], a: 0, e: "Affiche l'IP, le statut L1 (Physical) et L2 (Protocol)." },
+    { category: "Physique", q: "Quel terme décrit la diaphonie (interférence) entre deux paires de fils dans un câble ?", options: ["Crosstalk", "Atténuation", "Jitter", "Latence"], a: 0, e: "C'est une perturbation électromagnétique interne au câble." },
+    { category: "Gestion", q: "Quelle commande permet de définir un message d'avertissement légal à la connexion ?", options: ["banner motd #Message#", "banner login", "message welcome", "hostname Message"], a: 0, e: "Message Of The Day." },
+    { category: "IPv6", q: "En IPv6, comment est représenté un sous-réseau /64 typique ?", options: ["4 blocs hexadécimaux pour le réseau, 4 pour l'interface.", "32 bits réseau.", "128 bits réseau.", "Tout est aléatoire."], a: 0, e: "64 bits Préfixe + 64 bits ID Interface." },
+    { category: "Switching", q: "Quelle est la principale différence entre un Switch de couche 2 et un Switch de couche 3 ?", options: ["Le Switch L3 peut effectuer du routage inter-VLAN.", "Le Switch L3 est plus lent.", "Le Switch L2 comprend les adresses IP.", "Aucune différence."], a: 0, e: "Le Switch L3 possède des fonctions de routage (SVI, ports routés)." },
+    { category: "Physique", q: "Quelle commande permet de configurer manuellement la vitesse d'une interface ?", options: ["speed 1000", "bandwidth 1000", "clock rate 1000", "duplex full"], a: 0, e: "La commande 'speed' fixe la vitesse physique du port." },
+    { category: "Services IP", q: "Quel protocole permet à un PC d'obtenir automatiquement l'adresse d'un serveur DNS ?", options: ["DHCP", "DNS", "ARP", "HTTP"], a: 0, e: "Le serveur DHCP fournit l'IP, le Masque, la Gateway et le DNS." },
+    { category: "Switching", q: "Quel est l'état initial d'un port de switch lorsqu'il vient de s'allumer (avant forwarding) ?", options: ["Blocking / Listening", "Forwarding", "Disabled", "Routing"], a: 0, e: "STP bloque le port temporairement pour écouter les boucles." },
+    { category: "Gestion", q: "Quelle commande permet d'empêcher les messages de log d'interrompre votre saisie en console ?", options: ["logging synchronous", "no logging", "quiet mode", "service timestamps"], a: 0, e: "À configurer dans 'line console 0'." },
+    { category: "Gestion", q: "Quel est le but de la commande 'copy running-config tftp' ?", options: ["Sauvegarder la configuration sur un serveur distant.", "Sauvegarder en local.", "Effacer la configuration.", "Charger une image IOS."], a: 0, e: "Utile pour les backups externes." },
+    { category: "Transport", q: "Quelle caractéristique définit le protocole UDP ?", options: ["Sans connexion et sans garantie de livraison (Best Effort).", "Orienté connexion.", "Fiable.", "Lent."], a: 0, e: "Utilisé pour la voix et la vidéo (streaming)." },
+    { category: "Physique", q: "Pourquoi utilise-t-on la fibre optique plutôt que le cuivre entre deux bâtiments ?", options: ["Immunité aux interférences électriques et distance.", "Moins cher.", "Plus facile à plier.", "Alimente les téléphones (PoE)."], a: 0, e: "La fibre ne conduit pas l'électricité (pas de foudre/interférences)." },
+    { category: "Gestion", q: "Quelle commande permet de voir les voisins connectés via le protocole CDP ?", options: ["show cdp neighbors", "show ip route", "show neighbors", "ping"], a: 0, e: "Affiche le type d'appareil, l'interface et l'IP du voisin Cisco." },
+    { category: "Sécurité", q: "Dans une ACL, quel masque wildcard correspond à un hôte unique (ex: 192.168.1.1) ?", options: ["0.0.0.0", "255.255.255.255", "0.0.0.255", "Host 1.1.1.1"], a: 0, e: "0 signifie 'doit correspondre exactement'." }
+];
+
+
+// Simulation 100 questions
+while(FULL_DB.length < 100) { FULL_DB.push(...FULL_DB); }
+
+// --- VARIABLES ---
+let quizQuestions=[], userAnswers=[], timerInterval, timeLeft=DURATION_MIN*60, cheatCount=0;
+let state={name:"",school:"",major:"",ans:[]}, chatHistoryLog="";
+
+// --- IA ---
+async function callGroq(prompt, sys) {
+    try {
+        const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: 'POST', headers: {'Content-Type':'application/json', 'Authorization':`Bearer ${API_KEY}`},
+            body: JSON.stringify({model:"llama-3.1-8b-instant", messages:[{role:"system",content:sys},{role:"user",content:prompt}], temperature:0.3})
+        });
+        const d = await r.json();
+        return d.choices?.[0]?.message?.content || "Erreur IA";
+    } catch(e) { return "Erreur Connexion (VPN?)."; }
+}
+
+function toggleChat() { const w=document.getElementById('chat-window'); w.style.display = w.style.display==='flex'?'none':'flex'; }
+async function sendChat() {
+    const i=document.getElementById('chat-input'), b=document.getElementById('chat-messages');
+    if(!i.value.trim()) return;
+    const t=i.value.trim(); b.innerHTML+=`<div class="msg msg-user">${t}</div>`; i.value="";
+    const loadId="l"+Date.now(); b.innerHTML+=`<div class="msg msg-ai" id="${loadId}">Recherche...</div>`; b.scrollTop=b.scrollHeight;
+    const rep = await callGroq(t, "Expert CCNA. Réponse directe.");
+    document.getElementById(loadId).remove(); b.innerHTML+=`<div class="msg msg-ai">${fmt(rep)}</div>`; b.scrollTop=b.scrollHeight;
+    chatHistoryLog += `<div style="margin-bottom:10px; border-bottom:1px dashed #ccc;"><strong>Q:</strong> ${t}<br><strong>R:</strong> ${fmt(rep)}</div>`;
+}
+
+// --- COACH INTELLIGENT ---
+async function generateAICoach() {
+    const btn=document.getElementById('btn-generate-ai'), div=document.getElementById('ai-coach-content');
+    btn.disabled=true; btn.textContent="🧠 Analyse des performances...";
+    document.getElementById('ai-coach-container').style.display='block';
+
+    let stats={};
+    quizQuestions.forEach((q,i)=>{
+        let u=userAnswers[i], ok=false;
+        if(!stats[q.category]) stats[q.category]={t:0, s:0}; stats[q.category].t++;
+        if(q.type==='multi') { if(u && JSON.stringify(u.sort())===JSON.stringify(q.a.sort())) ok=true; } else { if(u===q.a) ok=true; }
+        if(ok) stats[q.category].s++;
+    });
+
+    let sum="Stats:\n";
+    for(const [c,d] of Object.entries(stats)) { sum+=`- ${c}: ${Math.round((d.s/d.t)*100)}%\n`; }
+    let p = `Agis comme un expert CCNA. Analyse ces stats:\n${sum}\nDonne 3 conseils de révision stratégiques.`;
+    
+    const rep = await callGroq(p, "Coach CCNA");
+    div.innerHTML = fmt(rep) + "<br><br><b>📜 Historique Tuteur :</b><br>" + (chatHistoryLog||"<i>Aucune question.</i>");
+    btn.style.display='none';
+}
+function fmt(t) { return t ? t.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>') : ""; }
+
+// --- LOGIQUE EXAMEN ---
+function startExam() {
+    const n=document.getElementById('name').value, s=document.getElementById('school').value, m=document.getElementById('major').value;
+    if(!n||!s||!m) { alert("Champs obligatoires."); return; }
+    state={name:n, school:s, major:m};
+    
+    document.getElementById('socratic-assistant-container').style.display='none';
+    document.documentElement.requestFullscreen().catch(e=>{});
+    
+    quizQuestions = FULL_DB.slice(0, REQUIRED_Q).sort(()=>0.5-Math.random());
+    userAnswers = new Array(REQUIRED_Q).fill(null);
+    state.ans = userAnswers;
+
+    document.getElementById('user-display').innerHTML = `👤 <b>${n}</b> &nbsp;|&nbsp; 🏫 ${s} &nbsp;|&nbsp; 🎓 ${m}`;
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app-header').style.display='flex'; document.getElementById('app-content').style.display='flex'; document.getElementById('app-footer').style.display='flex';
+    
+    renderQ(); genPal(); 
+    timerInterval = setInterval(()=>{ timeLeft--; document.getElementById('timer').textContent=`${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`; if(timeLeft<=0) finish(true); },1000);
+    
+    document.addEventListener("visibilitychange", ()=>{ if(document.hidden) checkCheat(); });
+    document.addEventListener("fullscreenchange", ()=>{ if(!document.fullscreenElement && document.getElementById('result-screen').style.display === 'none') checkCheat(); });
+}
+
+function checkCheat() { cheatCount++; document.getElementById('warn-count').textContent=cheatCount; if(cheatCount>=3) finishCheat(); else document.getElementById('cheat-overlay').style.display='flex'; }
+function closeCheat() { document.getElementById('cheat-overlay').style.display='none'; document.documentElement.requestFullscreen().catch(e=>{}); }
+function finishCheat() { clearInterval(timerInterval); alert("⛔ TRICHE DÉTECTÉE."); finish(true); }
+
+function renderQ() {
+    const c=document.getElementById('quiz-questions'); c.innerHTML="";
+    quizQuestions.forEach((q,i)=>{
+        let m=q.type==='multi', h=`<div class="question-card" id="q-${i}"><div class="q-tag">${q.category||"Général"}</div><div class="q-text">${i+1}. ${q.q} ${m?'(Choix multiple)':''}</div>`;
+        q.options.forEach((o,j)=> h+=`<div class="option" id="opt-${i}-${j}" onclick="sel(${i},${j},${m},${q.count})"><div class="marker ${m?'check':'radio'}"></div>${o}</div>`);
+        c.innerHTML+=h+"</div>";
+    });
+    document.querySelector('.question-card').classList.add('active');
+}
+
+function sel(q,i,m,max) {
+    let u=userAnswers[q]||(m?[]:null);
+    if(m) { if(u.includes(i)) u=u.filter(x=>x!==i); else if(u.length<max) u.push(i); if(u.length===0) u=null; } else u=i;
+    userAnswers[q]=u;
+    for(let k=0; k<5; k++) { let e=document.getElementById(`opt-${q}-${k}`); if(e) e.classList.remove('selected'); }
+    if(m&&u) u.forEach(x=>document.getElementById(`opt-${q}-${x}`).classList.add('selected'));
+    else if(!m && u!==null) document.getElementById(`opt-${q}-${u}`).classList.add('selected');
+    let b=document.getElementById(`p-btn-${q}`); if(u!==null) b.classList.add('answered'); else b.classList.remove('answered');
+}
+
+let cur=0; 
+function nav(d) { let n=cur+d; if(n>=0 && n<REQUIRED_Q) { document.getElementById(`q-${cur}`).classList.remove('active'); document.getElementById(`p-btn-${cur}`).classList.remove('active'); cur=n; document.getElementById(`q-${cur}`).classList.add('active'); document.getElementById(`p-btn-${cur}`).classList.add('active'); document.getElementById('q-indicator').textContent=`Question ${cur+1}/${REQUIRED_Q}`; if(cur===REQUIRED_Q-1){document.getElementById('next-btn').style.display='none';document.getElementById('finish-btn').style.display='block';}else{document.getElementById('next-btn').style.display='block';document.getElementById('finish-btn').style.display='none';} } }
+function genPal() { document.getElementById('palette-grid').innerHTML = quizQuestions.map((_,i)=>`<div class="p-btn" id="p-btn-${i}" onclick="nav(${i}-cur)">${i+1}</div>`).join(''); document.getElementById('p-btn-0').classList.add('active'); }
+function checkFinish(f=false) { if(!f && userAnswers.filter(a=>a===null).length>0) { alert("Il reste des questions vides."); return; } if(!f && !confirm("Envoyer la copie ?")) return; finish(); }
+
+async function finish() {
+    clearInterval(timerInterval); document.documentElement.requestFullscreen().catch(e=>{});
+    document.getElementById('app-header').style.display='none'; document.getElementById('app-content').style.display='none'; document.getElementById('app-footer').style.display='none'; document.getElementById('cheat-overlay').style.display='none';
+    document.getElementById('result-screen').style.display='block';
+
+    let score=0, catStats={}, details="", corrArea=document.getElementById('correction-area'); corrArea.innerHTML="";
+    quizQuestions.forEach((q,i)=>{
+        let u=userAnswers[i], ok=false;
+        if(!catStats[q.category]) catStats[q.category]={t:0, s:0}; catStats[q.category].t++;
+        if(q.type==='multi') { if(u && JSON.stringify(u.sort())===JSON.stringify(q.a.sort())) ok=true; } else { if(u===q.a) ok=true; }
+        if(ok) { score++; catStats[q.category].s++; }
+
+        let uTxt = u!==null ? (q.type==='multi'?u.map(x=>q.options[x]).join(', '):q.options[u]) : "VIDE";
+        let cTxt = q.type==='multi'?q.a.map(x=>q.options[x]).join(', '):q.options[q.a];
+        
+        // --- RAPPORT PDF OPTIMISÉ ---
+        corrArea.innerHTML += `
+        <div class="correction-item" style="border-left: 5px solid ${ok?'#28a745':'#dc3545'};">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <strong>Question ${i+1}</strong> 
+                <span style="color:${ok?'green':'red'}; font-weight:bold;">${ok?'✅ CORRECT':'❌ INCORRECT'}</span>
+            </div>
+            <div style="margin-bottom:8px;">${q.q}</div>
+            <div style="font-size:0.9rem; background:#f8f9fa; padding:10px; border-radius:5px;">
+                <div style="margin-bottom:5px;">👤 <strong>Votre réponse :</strong> <span style="color:${ok?'green':'red'}">${uTxt}</span></div>
+                ${!ok ? `<div>✅ <strong>Bonne réponse :</strong> <span style="color:green">${cTxt}</span></div>` : ''}
+            </div>
+            <div style="margin-top:8px; padding:10px; background:#e0f2fe; border-left:4px solid #0056b3; border-radius:4px; font-size:0.9rem; color:#0c4a6e;">
+                <strong>💡 Explication :</strong> ${q.e}
+            </div>
+        </div>`;
+        
+        details += `Q${i+1} [${q.category}]: ${ok?'OK':'ERR'} (Rep: ${uTxt})\n`;
+    });
+
+    let dt = new Date().toLocaleString('fr-FR', {dateStyle:'full', timeStyle:'short'});
+    document.getElementById('final-score').textContent = `${score}/100`;
+    document.getElementById('final-decision').innerHTML = score>=PASS_SCORE ? "<span style='color:green'>ADMIS</span>" : "<span style='color:red'>ÉCHEC</span>";
+    document.getElementById('res-name').textContent = state.name; document.getElementById('res-school').textContent = state.school; document.getElementById('res-major').textContent = state.major; document.getElementById('res-date').textContent = dt; document.getElementById('res-cheats').textContent = cheatCount;
+
+    let statsHTML=""; for(const [c,d] of Object.entries(catStats)) { let p=Math.round((d.s/d.t)*100); statsHTML+=`<div class="cat-stat-row"><div class="cat-label"><span>${c}</span><span>${p}%</span></div><div class="progress-bg"><div class="progress-fill" style="width:${p}%;background:${p>=80?'green':p>=50?'orange':'red'}"></div></div></div>`; }
+    document.getElementById('category-stats-container').innerHTML = statsHTML;
+
+    try {
+        await fetch("https://formspree.io/f/xkogdnag", { 
+            method:"POST", headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({ Sujet:`Resultat ${state.name} (${score}/100)`, Examen:"Examen Théorique Mini-Projet Janvier 2026", Candidat:state.name, Ecole:state.school, Score:`${score}/100`, Date:dt, Triche:cheatCount, Details:details })
+        });
+        document.getElementById('mail-status').textContent="Rapport envoyé."; document.getElementById('mail-status').style.color="green";
+    } catch(e) { document.getElementById('mail-status').textContent="Erreur envoi."; }
+}
+</script>
+</body>
+</html>
