@@ -211,7 +211,18 @@ const PART_1 = "gsk_";
 const PART_2 = "3c2NtKTExpZrRBxMbyCzWGdyb3FYU9fwh4cBd1bxJRwi35zyuRpJ"; // Mettez ici la fin de la clé (après le gsk_)
 const API_KEY = PART_1 + PART_2;
 
-
+// --- SÉCURITÉ ANTI-REJEU ---
+if (localStorage.getItem("examen_ia_termine") === "true") {
+    document.body.innerHTML = `
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:sans-serif; text-align:center;">
+            <div style="font-size:4rem;">⛔</div>
+            <h1 style="color:#dc2626;">Accès Refusé</h1>
+            <p style="font-size:1.2rem;">Vous avez déjà soumis votre copie pour cet examen.</p>
+            <p style="color:#666;">Contactez l'enseignant ELVIS TCHIMEGNI.</p>
+        </div>
+    `;
+    throw new Error("Examen déjà passé !"); // Stoppe l'exécution du reste du script
+}
 
 
 // --- BASE DE DONNÉES (CORRIGÉE : SANS IMAGES) ---
@@ -504,6 +515,7 @@ function genPal() { document.getElementById('palette-grid').innerHTML = quizQues
 function checkFinish(f=false) { if(!f && userAnswers.filter(a=>a===null).length>0) { alert("Il reste des questions vides."); return; } if(!f && !confirm("Envoyer la copie ?")) return; finish(); }
 
 async function finish() {
+    localStorage.setItem("examen_ia_termine", "true");
     clearInterval(timerInterval); document.documentElement.requestFullscreen().catch(e=>{});
     document.getElementById('app-header').style.display='none'; document.getElementById('app-content').style.display='none'; document.getElementById('app-footer').style.display='none'; document.getElementById('cheat-overlay').style.display='none';
     document.getElementById('result-screen').style.display='block';
@@ -556,5 +568,4 @@ async function finish() {
 }
 </script>
 </body>
-
 </html>
