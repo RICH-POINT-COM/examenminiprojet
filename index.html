@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Examen Théorique Mini-Projet - Mars 2026</title>
+    <title>Examen de fin de formation - Mars 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -359,15 +359,15 @@
     <div class="info-box">
         <h3>🔒 CONSIGNES</h3>
         <ul>
-            <li><strong style="color:var(--cyan);">Durée :</strong> 100 minutes</li>
+            <li><strong style="color:var(--cyan);">Durée :</strong> 50 minutes</li>
             <li><strong style="color:var(--cyan);">Questions :</strong> 100 QCM</li>
             <li><strong style="color:var(--cyan);">Sécurité :</strong> 3 sorties d'écran = Disqualification</li>
             <li><strong style="color:var(--cyan);">Tuteur :</strong> Disponible ici, indisponible durant l'examen</li>
         </ul>
     </div>
-    <div class="input-group"><label>Nom & Prénom</label><input type="text" id="name" placeholder="Ex: TCHANKO PRINCE"></div>
-    <div class="input-group"><label>Établissement</label><input type="text" id="school" placeholder="Ex: KTC CENTER"></div>
-    <div class="input-group"><label>Filière</label><input type="text" id="major" placeholder="Ex: MRI"></div>
+    <div class="input-group"><label>Nom & Prénom</label><input type="text" id="name" placeholder="Ex: ABOA LOUISE"></div>
+    <div class="input-group"><label>Établissement</label><input type="text" id="school" placeholder="Ex: LOCALHOST ACADEMY"></div>
+    <div class="input-group"><label>Filière</label><input type="text" id="major" placeholder="Ex:ADMIN SYSTEME ET RESEAU"></div>
     <button class="btn btn-next" style="width:100%; max-width:480px; padding:16px; font-size:1.15rem; margin-top:20px; letter-spacing:2px;" onclick="startExam()">▶ LANCER L'EXAMEN</button>
     <p style="color:var(--danger); font-size:0.85rem; margin-top:12px; font-family:'Share Tech Mono',monospace;">⚠ Le Tuteur disparaîtra au lancement</p>
 </div>
@@ -375,7 +375,7 @@
 <div class="app-container">
     <div class="header" id="app-header" style="display:none;">
         <div class="user-info-bar" id="user-display"></div>
-        <div class="timer-badge" id="timer">100:00</div>
+        <div class="timer-badge" id="timer">50:00</div>
     </div>
     <div class="main-content" id="app-content" style="display:none;">
         <div class="quiz-area"><div id="quiz-questions"></div></div>
@@ -397,7 +397,7 @@
 <div id="result-screen" class="full-screen-overlay" style="display:none; align-items:flex-start;">
     <div style="border-bottom:2px solid var(--cyan); width:100%; padding-bottom:15px; margin-bottom:20px;">
         <h1 style="font-family:'Orbitron',sans-serif; color:var(--cyan); margin:0; font-size:1.6rem; letter-spacing:3px;">Rapport d'Examen</h1>
-        <h3 style="margin:5px 0; color:var(--text-main); font-weight:400;">SESSION NORMALE RÉSEAU INFORMATIQUE CCNA1 — MARS 2026</h3>
+        <h3 style="margin:5px 0; color:var(--text-main); font-weight:400;">EVALUATION DE FIN DE PARCOURS — MARS 2026</h3>
     </div>
 
     <div style="display:flex; justify-content:space-between; width:100%; max-width:900px; margin-bottom:30px; background:rgba(0,240,255,0.03); padding:18px; border-radius:10px; border:1px solid var(--panel-border);">
@@ -438,7 +438,7 @@
 
 <script>
 // --- CONFIGURATION ---
-const REQUIRED_Q = 100, PASS_SCORE = 50, DURATION_MIN = 100;
+const REQUIRED_Q = 100, PASS_SCORE = 50, DURATION_MIN = 50;
 const PART_1 = "gsk_"; 
 const PART_2 = "3c2NtKTExpZrRBxMbyCzWGdyb3FYU9fwh4cBd1bxJRwi35zyuRpJ";
 const API_KEY = PART_1 + PART_2;
