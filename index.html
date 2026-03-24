@@ -549,11 +549,11 @@ const FULL_DB = [
     { category: "Physique", q: "Quelle topologie réseau offre la meilleure redondance ?", options: ["Maillée complète", "Étoile", "Bus", "Anneau"], a: 0, e: "Tous les nœuds sont connectés entre eux." },
    // { category: "Physique", q: "Quel type de fibre optique est utilisé pour les longues distances ?", options: ["Monomode", "Multimode", "Coax", "UTP"], a: 0, e: "Source Laser." },
   //  { category: "Physique", q: "Quel type de fibre optique utilise une LED comme source lumineuse ?", options: ["Monomode", "Multimode", "Coax", "UTP"], a: 1, e: "Courte distance." },
-  //  { category: "Physique", q: "Quelle catégorie de câble Ethernet supporte 1 Gbps au minimum ?", options: ["Cat5e", "Cat3", "Cat4", "Coax"], a: 0, e: "Cat5e ou Cat6." },
+    { category: "Physique", q: "Quelle catégorie de câble Ethernet supporte 1 Gbps au minimum ?", options: ["Cat5e", "Cat3", "Cat4", "Coax"], a: 0, e: "Cat5e ou Cat6." },
   //  { category: "Physique", q: "Quelle est la distance maximale théorique d'un câble UTP Ethernet ?", options: ["100 mètres", "50 mètres", "200 mètres", "500 mètres"], a: 0, e: "Standard 100m." },
-    //{ category: "Gestion", q: "Quelle commande Windows permet d'afficher le cache ARP ?", options: ["arp -a", "show arp", "ip arp", "getmac"], a: 0, e: "Commande DOS." },
+    { category: "Gestion", q: "Quelle commande Windows permet d'afficher le cache ARP ?", options: ["arp -a", "show arp", "ip arp", "getmac"], a: 0, e: "Commande DOS." },
     { category: "Gestion", q: "Quelle commande Windows permet d'afficher la configuration IP ?", options: ["ipconfig", "ifconfig", "show ip", "ip addr"], a: 0, e: "ifconfig est pour Linux." },
-  //  { category: "Gestion", q: "Quelle commande Windows permet de tracer la route vers une destination ?", options: ["tracert", "traceroute", "trace", "pathping"], a: 0, e: "tracert (traceroute sur Cisco)." },
+   { category: "Gestion", q: "Quelle commande Windows permet de tracer la route vers une destination ?", options: ["tracert", "traceroute", "trace", "pathping"], a: 0, e: "tracert (traceroute sur Cisco)." },
 
     // --- CONCEPTS RÉSEAU ---
     { category: "Fondamentaux", q: "Quel périphérique réseau a pour fonction principale de déterminer le meilleur chemin pour les paquets ?", options: ["Le Périphérique intermédiaire (Routeur)", "Le Périphérique final", "Le Serveur", "Le Support de transmission"], a: 0, e: "Les routeurs prennent les décisions de routage basées sur les adresses IP." },
@@ -572,9 +572,9 @@ const FULL_DB = [
  //   { category: "Routage", q: "Si le 'Next-Hop' d'une route statique est une adresse IP, que doit faire le routeur ?", options: ["Effectuer une consultation récursive pour trouver l'interface de sortie.", "Envoyer directement le paquet.", "Jeter le paquet.", "Envoyer un broadcast."], a: 0, e: "Il doit chercher dans la table de routage comment atteindre cette IP de saut suivant." },
    // { category: "Routage", q: "Dans le processus de routage, que signifie la règle du 'Longest Match' (Correspondance la plus longue) ?", options: ["Le routeur utilise la route avec le masque le plus précis (le plus long).", "Le routeur utilise le protocole le plus rapide.", "Le routeur utilise la route par défaut.", "Le routeur utilise la première route trouvée."], a: 0, e: "Un /32 sera toujours préféré à un /24 pour la même destination." },
  //   { category: "Routage", q: "Qu'est-ce qu'une route statique flottante ?", options: ["Une route de secours avec une Distance Administrative plus élevée.", "Une route principale.", "Une route pour le trafic rapide.", "Une route sans fil."], a: 0, e: "Elle ne s'active que si la route principale (AD plus basse) tombe." },
-  //  { category: "Routage", q: "Quels paramètres sont utilisés pour calculer la métrique EIGRP par défaut ?", options: ["La Bande passante et le Délai", "Le nombre de Sauts", "Le Coût OSPF", "La Vitesse du lien"], a: 0, e: "C'est une métrique composite basée sur les valeurs K." },
-  //  { category: "Routage", q: "Quel code identifie une route apprise par EIGRP dans la table de routage ?", options: ["D", "E", "O", "R"], a: 0, e: "D provient de l'algorithme DUAL utilisé par EIGRP." },
-   // { category: "Routage", q: "Quel protocole de couche 3 est utilisé par la commande Traceroute pour signaler les sauts ?", options: ["ICMP (Time Exceeded)", "UDP", "TCP", "IP"], a: 0, e: "Les routeurs renvoient un message ICMP quand le TTL expire." },
+  { category: "Routage", q: "Quels paramètres sont utilisés pour calculer la métrique EIGRP par défaut ?", options: ["La Bande passante et le Délai", "Le nombre de Sauts", "Le Coût OSPF", "La Vitesse du lien"], a: 0, e: "C'est une métrique composite basée sur les valeurs K." },
+   { category: "Routage", q: "Quel code identifie une route apprise par EIGRP dans la table de routage ?", options: ["D", "E", "O", "R"], a: 0, e: "D provient de l'algorithme DUAL utilisé par EIGRP." },
+    { category: "Routage", q: "Quel protocole de couche 3 est utilisé par la commande Traceroute pour signaler les sauts ?", options: ["ICMP (Time Exceeded)", "UDP", "TCP", "IP"], a: 0, e: "Les routeurs renvoient un message ICMP quand le TTL expire." },
  //   { category: "Routage", q: "Que désigne le terme 'Gateway of last resort' (Passerelle de dernier recours) ?", options: ["La route par défaut (0.0.0.0/0).", "Le dernier routeur du réseau.", "La connexion Internet.", "La passerelle du PC."], a: 0, e: "C'est la route utilisée si aucune autre route ne correspond." },
 
     // --- VLAN & TRUNKING ---
@@ -593,7 +593,7 @@ const FULL_DB = [
     // --- OSPF ---
     { category: "Routage", q: "À quelle catégorie de protocoles de routage appartient OSPF ?", options: ["État de liens (Link-State)", "Vecteur de distance", "Hybride", "Statique"], a: 0, e: "Il connait la topologie complète du réseau." },
     { category: "Routage", q: "Quelle formule est utilisée par OSPF pour calculer son coût (métrique) ?", options: ["Bande passante de référence / Bande passante de l'interface", "Nombre de sauts", "Délai total", "Charge du lien"], a: 0, e: "Plus la bande passante est élevée, plus le coût est bas." },
-  //  { category: "Routage", q: "Quelle est l'adresse Multicast utilisée pour contacter tous les routeurs OSPF ?", options: ["224.0.0.5", "224.0.0.6", "224.0.0.1", "224.0.0.9"], a: 0, e: "224.0.0.6 est pour les DR/BDR uniquement." },
+  { category: "Routage", q: "Quelle est l'adresse Multicast utilisée pour contacter tous les routeurs OSPF ?", options: ["224.0.0.5", "224.0.0.6", "224.0.0.1", "224.0.0.9"], a: 0, e: "224.0.0.6 est pour les DR/BDR uniquement." },
     { category: "Routage", q: "Quel type de paquet OSPF est utilisé pour maintenir le voisinage (Keepalive) ?", options: ["Hello", "LSU", "DBD", "LSR"], a: 0, e: "Envoyé périodiquement (ex: 10s)." },
     { category: "Routage", q: "Comment se nomme la zone principale (Backbone) obligatoire dans OSPF ?", options: ["Zone 0", "Zone 1", "Zone 100", "Zone B"], a: 0, e: "Toutes les autres zones doivent s'y connecter." },
     { category: "Routage", q: "Quel est le premier critère pour l'élection du routeur désigné (DR) ?", options: ["La priorité d'interface la plus haute", "L'adresse IP la plus basse", "L'adresse MAC la plus haute", "Le hasard"], a: 0, e: "Si égalité, on regarde le Router ID." },
@@ -622,7 +622,7 @@ const FULL_DB = [
     { category: "Gestion", q: "Quelle commande permet de définir un message d'avertissement légal à la connexion ?", options: ["banner motd #Message#", "banner login", "message welcome", "hostname Message"], a: 0, e: "Message Of The Day." },
     { category: "IPv6", q: "En IPv6, comment est représenté un sous-réseau /64 typique ?", options: ["4 blocs hexadécimaux pour le réseau, 4 pour l'interface.", "32 bits réseau.", "128 bits réseau.", "Tout est aléatoire."], a: 0, e: "64 bits Préfixe + 64 bits ID Interface." },
     //{ category: "Switching", q: "Quelle est la principale différence entre un Switch de couche 2 et un Switch de couche 3 ?", options: ["Le Switch L3 peut effectuer du routage inter-VLAN.", "Le Switch L3 est plus lent.", "Le Switch L2 comprend les adresses IP.", "Aucune différence."], a: 0, e: "Le Switch L3 possède des fonctions de routage (SVI, ports routés)." },
-    //{ category: "Physique", q: "Quelle commande permet de configurer manuellement la vitesse d'une interface ?", options: ["speed 1000", "bandwidth 1000", "clock rate 1000", "duplex full"], a: 0, e: "La commande 'speed' fixe la vitesse physique du port." },
+    { category: "Physique", q: "Quelle commande permet de configurer manuellement la vitesse d'une interface ?", options: ["speed 1000", "bandwidth 1000", "clock rate 1000", "duplex full"], a: 0, e: "La commande 'speed' fixe la vitesse physique du port." },
     { category: "Services IP", q: "Quel protocole permet à un PC d'obtenir automatiquement l'adresse d'un serveur DNS ?", options: ["DHCP", "DNS", "ARP", "HTTP"], a: 0, e: "Le serveur DHCP fournit l'IP, le Masque, la Gateway et le DNS." },
     { category: "Switching", q: "Quel est l'état initial d'un port de switch lorsqu'il vient de s'allumer (avant forwarding) ?", options: ["Blocking / Listening", "Forwarding", "Disabled", "Routing"], a: 0, e: "STP bloque le port temporairement pour écouter les boucles." },
    // { category: "Gestion", q: "Quelle commande permet d'empêcher les messages de log d'interrompre votre saisie en console ?", options: ["logging synchronous", "no logging", "quiet mode", "service timestamps"], a: 0, e: "À configurer dans 'line console 0'." },
@@ -787,7 +787,7 @@ async function finish() {
     try {
         await fetch("https://formspree.io/f/xkogdnag", { 
             method:"POST", headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({ Sujet:`Resultat ${state.name} (${score}/100)`, Examen:"Examen Théorique Mini-Projet Mars 2026", Candidat:state.name, Ecole:state.school, Score:`${score}/100`, Date:dt, Triche:cheatCount, Details:details })
+            body:JSON.stringify({ Sujet:`Resultat ${state.name} (${score}/100)`, Examen:"Examen de fin de formation Mars 2026", Candidat:state.name, Ecole:state.school, Score:`${score}/100`, Date:dt, Triche:cheatCount, Details:details })
         });
         document.getElementById('mail-status').textContent="✓ Rapport transmis avec succès."; document.getElementById('mail-status').style.color="var(--success)";
     } catch(e) { document.getElementById('mail-status').textContent="✗ Erreur de transmission."; }
