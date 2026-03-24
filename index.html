@@ -351,8 +351,8 @@
 <div id="login-screen" class="full-screen-overlay">
     <div style="margin-top:40px;"></div>
     <div style="font-size:3rem; margin-bottom:5px;">⟁</div>
-    <h1 style="font-family:'Orbitron',sans-serif; font-size:1.4rem; color:var(--cyan); letter-spacing:4px; text-transform:uppercase;">Session normale Réseau Informatique</h1>
-    <h2 style="font-family:'Orbitron',sans-serif; font-size:0.9rem; color:var(--purple); letter-spacing:3px; margin-top:5px;">CCNA1 KTC CENTER— MARS 2026</h2>
+    <h1 style="font-family:'Orbitron',sans-serif; font-size:1.4rem; color:var(--cyan); letter-spacing:4px; text-transform:uppercase;">examen de fin de parcours</h1>
+    <h2 style="font-family:'Orbitron',sans-serif; font-size:0.9rem; color:var(--purple); letter-spacing:3px; margin-top:5px;">Locahost Academy— MARS 2026</h2>
     <div class="glow-line" style="max-width:480px;"></div>
     <p style="font-size:1.05rem; color:rgba(200,214,229,0.6); margin-bottom:20px;">Enseignant : <strong style="color:var(--text-bright);">Elvis TCHIMEGNI</strong></p>
 
@@ -631,6 +631,32 @@ const FULL_DB = [
     { category: "Physique", q: "Pourquoi utilise-t-on la fibre optique plutôt que le cuivre entre deux bâtiments ?", options: ["Immunité aux interférences électriques et distance.", "Moins cher.", "Plus facile à plier.", "Alimente les téléphones (PoE)."], a: 0, e: "La fibre ne conduit pas l'électricité (pas de foudre/interférences)." },
    // { category: "Gestion", q: "Quelle commande permet de voir les voisins connectés via le protocole CDP ?", options: ["show cdp neighbors", "show ip route", "show neighbors", "ping"], a: 0, e: "Affiche le type d'appareil, l'interface et l'IP du voisin Cisco." },
    // { category: "Sécurité", q: "Dans une ACL, quel masque wildcard correspond à un hôte unique (ex: 192.168.1.1) ?", options: ["0.0.0.0", "255.255.255.255", "0.0.0.255", "Host 1.1.1.1"], a: 0, e: "0 signifie 'doit correspondre exactement'." }
+        // --- CLOUD COMPUTING ---
+    { category: "Cloud", q: "Selon le NIST, quelle est la définition du Cloud Computing ?", options: ["Un réseau local privé", "Un accès réseau à la demande à un pool partagé de ressources informatiques configurables", "Un logiciel installé sur chaque poste de travail", "Un protocole de routage dynamique"], a: 1, e: "Le NIST définit le Cloud comme un accès on-demand à des ressources partagées (réseaux, serveurs, stockage, applications)." },
+    { category: "Cloud", q: "Quels sont les trois principaux modèles de service du Cloud Computing ?", options: ["IaaS, PaaS, SaaS", "TCP, UDP, ICMP", "LAN, WAN, MAN", "HTTP, FTP, DNS"], a: 0, e: "Infrastructure as a Service, Platform as a Service, Software as a Service." },
+    { category: "Cloud", q: "Quels sont les quatre types de déploiement du Cloud selon le NIST ?", options: ["Public, Privé, Hybride, Communautaire", "Local, Distant, Virtuel, Physique", "Interne, Externe, Mixte, Ouvert", "Gratuit, Payant, Freemium, Open Source"], a: 0, e: "Le NIST définit 4 modèles : Public (AWS, Azure), Privé (entreprise), Hybride (mixte), Communautaire (partagé entre organisations)." },
+
+    // --- SÉCURITÉ RÉSEAU ---
+    { category: "Sécurité", q: "Quel est le rôle principal d'un pare-feu (Firewall) dans un réseau ?", options: ["Filtrer le trafic entrant et sortant selon des règles de sécurité", "Attribuer des adresses IP automatiquement", "Accélérer la vitesse de connexion Internet", "Convertir les adresses IPv4 en IPv6"], a: 0, e: "Le pare-feu contrôle le trafic réseau en autorisant ou bloquant les paquets selon des règles définies par l'administrateur." },
+    { category: "Sécurité", q: "Quel est le rôle principal d'un VPN (Virtual Private Network) ?", options: ["Créer un tunnel chiffré sécurisé sur un réseau public (Internet)", "Remplacer le routeur principal du réseau", "Augmenter la bande passante disponible", "Bloquer les virus informatiques"], a: 0, e: "Le VPN crée un tunnel chiffré permettant de communiquer de manière sécurisée sur Internet, comme si on était sur un réseau privé." },
+    { category: "Sécurité", q: "Quel système surveille le trafic réseau pour détecter et signaler les activités suspectes ?", options: ["IDS (Intrusion Detection System)", "DNS (Domain Name System)", "DHCP (Dynamic Host Configuration Protocol)", "NAT (Network Address Translation)"], a: 0, e: "L'IDS analyse le trafic en temps réel et alerte l'administrateur en cas d'intrusion. L'IPS va plus loin en bloquant automatiquement." },
+
+    // --- SE WINDOWS ---
+    { category: "Windows", q: "Quel est le système de fichiers par défaut utilisé par Windows depuis Windows NT ?", options: ["NTFS", "FAT32", "EXT4", "HFS+"], a: 0, e: "NTFS (New Technology File System) supporte les permissions, le chiffrement et les fichiers volumineux." },
+    { category: "Windows", q: "Quel outil Windows permet de gérer les partitions de disques durs ?", options: ["Gestion des disques (diskmgmt.msc)", "Éditeur de registre (regedit)", "Gestionnaire de tâches (taskmgr)", "Invite de commandes (cmd)"], a: 0, e: "La console Gestion des disques permet de créer, supprimer, formater et redimensionner des partitions." },
+    { category: "Windows", q: "Quelle commande Windows permet de vérifier la connectivité réseau avec un hôte distant ?", options: ["ping", "format", "chkdsk", "defrag"], a: 0, e: "La commande ping envoie des paquets ICMP Echo Request pour tester la joignabilité d'un hôte." },
+
+    // --- SE LINUX ---
+    { category: "Linux", q: "Quel est le rôle du compte 'root' sous Linux ?", options: ["C'est le super-utilisateur avec tous les droits d'administration", "C'est un compte invité avec accès limité", "C'est le nom du noyau Linux", "C'est un service réseau"], a: 0, e: "Root est l'administrateur suprême du système Linux, il possède tous les privilèges sans restriction." },
+    { category: "Linux", q: "Quel système de fichiers est le plus couramment utilisé par défaut sous Linux ?", options: ["EXT4", "NTFS", "FAT32", "APFS"], a: 0, e: "EXT4 (Fourth Extended Filesystem) est le système de fichiers standard de la plupart des distributions Linux." },
+    { category: "Linux", q: "Quel symbole représente le répertoire personnel (home) de l'utilisateur courant sous Linux ?", options: ["~ (tilde)", "/ (slash)", "# (dièse)", "$ (dollar)"], a: 0, e: "Le tilde ~ est un raccourci pour /home/nom_utilisateur." },
+
+    // --- COMMANDES LINUX ---
+    { category: "Commandes Linux", q: "Quelle commande Linux permet de lister le contenu d'un répertoire ?", options: ["ls", "cd", "rm", "cat"], a: 0, e: "ls (list) affiche les fichiers et dossiers. Options utiles : ls -l (détails), ls -a (fichiers cachés)." },
+    { category: "Commandes Linux", q: "Quelle commande Linux permet d'effacer l'écran du terminal ?", options: ["clear", "cls", "clean", "reset"], a: 0, e: "clear nettoie l'affichage du terminal. Le raccourci clavier Ctrl+L fait la même chose." },
+    { category: "Commandes Linux", q: "Quelle commande Linux permet de changer de répertoire courant ?", options: ["cd", "mv", "cp", "pwd"], a: 0, e: "cd (change directory). Exemples : cd /etc, cd ..(remonter), cd ~ (home)." },
+    { category: "Commandes Linux", q: "Quelle commande Linux permet d'afficher le répertoire de travail actuel ?", options: ["pwd", "ls", "whoami", "echo"], a: 0, e: "pwd (Print Working Directory) affiche le chemin absolu du répertoire courant." },
+    { category: "Commandes Linux", q: "Quelle commande Linux permet de créer un nouveau répertoire ?", options: ["mkdir", "touch", "rmdir", "newdir"], a: 0, e: "mkdir (make directory). Exemple : mkdir mon_dossier. Option -p pour créer des répertoires imbriqués." },
 ];
 
 
