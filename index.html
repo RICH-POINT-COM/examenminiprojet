@@ -444,6 +444,7 @@ const PART_2 = "3c2NtKTExpZrRBxMbyCzWGdyb3FYU9fwh4cBd1bxJRwi35zyuRpJ";
 const API_KEY = PART_1 + PART_2;
 
 // --- SÉCURITÉ ANTI-REJEU ---
+    /*
 if (localStorage.getItem("examen_ia_termine") === "true") {
     document.body.innerHTML = `
         <div style="display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:'Orbitron',sans-serif; text-align:center; background:#05070f; color:#edf2f7;">
@@ -455,7 +456,7 @@ if (localStorage.getItem("examen_ia_termine") === "true") {
     `;
     throw new Error("Examen déjà passé !");
 }
-
+*/
 // --- BASE DE DONNÉES ---
 const FULL_DB = [
     { category: "Fondamentaux", type: 'multi', count: 2, q: "Quels équipements réseau fonctionnent au niveau de la couche 2 (Liaison de données) ?", options: ["Switch", "Hub", "Pont (Bridge)", "Répéteur"], a: [0, 2], e: "Switch et Pont utilisent les adresses MAC." },
@@ -768,7 +769,7 @@ function genPal() { document.getElementById('palette-grid').innerHTML = quizQues
 function checkFinish(f=false) { if(!f && userAnswers.filter(a=>a===null).length>0) { alert("Il reste des questions vides."); return; } if(!f && !confirm("Envoyer la copie ?")) return; finish(); }
 
 async function finish() {
-    localStorage.setItem("examen_ia_termine", "true");
+    //localStorage.setItem("examen_ia_termine", "true");
     clearInterval(timerInterval); document.documentElement.requestFullscreen().catch(e=>{});
     document.getElementById('app-header').style.display='none'; document.getElementById('app-content').style.display='none'; document.getElementById('app-footer').style.display='none'; document.getElementById('cheat-overlay').style.display='none';
     document.getElementById('result-screen').style.display='block';
